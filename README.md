@@ -8,6 +8,7 @@ It's like Amazon but worse
 #### Fist steps
 
 * Install the npm modules need
+
 ![gif of installing npm modules]
 (images/steps01.gif)
 
