@@ -13,13 +13,12 @@ var connection = mysql.createConnection({
 function connectToDB(){
   connection.connect(function(err){
     if (err) throw err;
-    displayItems();
+    displayItems()
   });
 }
 
 
 function displayItems(){
-
   console.log("Here are today's deals!\n");
   connection.query("SELECT * FROM products", function(err, res) {
   if (err) throw err;
@@ -55,15 +54,62 @@ function userPrompt(){
           return choiceArr;
         },
         message: "Which item would you like to purchase?"
+      },
+      {
+        name: "amount",
+        type: "input",
+        message: "How many?"
       }
     ]).then(function(answer){
-      console.log(answer.userChoice);
-      //connection.end();
+      var chosenItem;
+      for (var i = 0; i < results.length; i++) {
+        if (answer.userChoice === results[i].product_name) {
+          chosenItem = results[i];
+        }
+      }
+
+      if (parseInt(answer.amount) <= chosenItem.stock_quantity) {
+        var newAmount = chosenItem.stock_quantity - parseInt(answer.amount);
+        connection.query("UPDATE products SET ? WHERE ?", [
+          {
+            stock_quantity: newAmount
+          },
+          {
+            item_id: chosenItem.item_id
+          }
+        ], function(err){
+          if (err) throw err;
+          console.log("Thank you for your business.  Your total is:\n");
+          console.log("$" + (chosenItem.price * parseInt(answer.amount)));
+          stayOrGo();
+        });
+      } else {
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        console.log("There is not enough " + answer.userChoice + "! Try again.");
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        stayOrGo();
+      }
     });//--.then--
   });//--connection.query--
 
 }//--userPrompt--
 
+function stayOrGo(){
+  inquirer.prompt([
+    {
+      name: "answer",
+      type: "list",
+      message: "Would you like to make any more puchases?",
+      choices: ["YES", "NO"]
+    }
+  ]).then(function(res){
+    if (res.answer === "YES") {
+      displayItems();
+    } else {
+      connection.end();
+    }
+  });//--.then--
+}//--stayOrGo--
 
-//-_-_-_-_-_-_-_-_-_-_-_-_[TESTING FUNCTION CALLS]_-_-_-_-_-_-_-_-_-_-_-_-//
-displayItems();
+//-_-_-_-_-_-_-_-_-_-_-_-_-[FUNCTION CALL]-_-_-_-_-_-_-_-_-_-_-_-_-//
+connectToDB();
