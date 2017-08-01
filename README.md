@@ -37,3 +37,5 @@ It's like Amazon but worse
 * If there is not enough of the item you want, Bamazon will let you know
 
 ![screenshot](images/05BamazonNotEnough.png)
+
+*Aaron Walker 2017*
